@@ -48,6 +48,24 @@ export default {
                 input.onchange = async () => {
                   console.log("onchange 작동");
                   const file = input.files[0];
+
+                  // const formData = new FormData();
+                  // formData.append('file', file);
+                  //
+                  // // 1. 서버에 파일 업로드 요청
+                  // const response = await axios.post('/api/upload', formData, {
+                  //   headers: {
+                  //     'Content-Type': 'multipart/form-data',
+                  //   },
+                  // });
+                  //
+                  // // 2. 서버가 리턴해준 S3 URL 받아오기
+                  // const s3ImageUrl = response.data.url;
+                  //
+                  // // 3. 에디터에 삽입
+                  // if(s3ImageUrl){
+                  // quill.insertEmbed(range.index, 'image', s3ImageUrl);
+
                   if (file) {
                     console.log("파일 존재")
                     const reader = new FileReader();
@@ -55,6 +73,7 @@ export default {
                       const range = quill.getSelection(true);
                       quill.insertEmbed(range.index, 'image', e.target.result);
 
+                      // 요소들이 로딩 된 이후에 시작하기
                       nextTick(() => {
                         const img = quill.root.querySelector(`img[src="${e.target.result}"]`);
                         if (img) {
