@@ -15,6 +15,7 @@
 
 <script>
 import {ref, onMounted, nextTick} from 'vue'
+import axios from 'axios'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import QuillResize from 'quill-resize-module';
@@ -49,29 +50,30 @@ export default {
                   console.log("onchange 작동");
                   const file = input.files[0];
 
-                  // const formData = new FormData();
-                  // formData.append('file', file);
-                  //
-                  // // 1. 서버에 파일 업로드 요청
-                  // const response = await axios.post('/api/upload', formData, {
-                  //   headers: {
-                  //     'Content-Type': 'multipart/form-data',
-                  //   },
-                  // });
-                  //
-                  // // 2. 서버가 리턴해준 S3 URL 받아오기
-                  // const s3ImageUrl = response.data.url;
-                  //
-                  // // 3. 에디터에 삽입
-                  // if(s3ImageUrl){
-                  // quill.insertEmbed(range.index, 'image', s3ImageUrl);
-
                   if (file) {
                     console.log("파일 존재")
                     const reader = new FileReader();
-                    reader.onload = (e) => {
+                    reader.onload = async(e) => {
                       const range = quill.getSelection(true);
-                      quill.insertEmbed(range.index, 'image', e.target.result);
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        
+                        // 1. 서버에 파일 업로드 요청
+                        const response = await axios.post('http://localhost:8000/api/v1/s2/image', formData, {
+                          headers: {
+                            'Content-Type': 'multipart/form-data',
+                          },
+                        });
+                        console.log("한번 열기", response.data);
+                        console.log("두번 열기", response.data.data)
+                        
+                        // 2. 서버가 리턴해준 S3 URL 받아오기
+                        const cloudFrontImage = response.data.data.imageUrl;
+                        
+                        // 3. 에디터에 삽입
+                        if(cloudFrontImage){
+                          quill.insertEmbed(range.index, 'image', cloudFrontImage)
+                        };
 
                       // 요소들이 로딩 된 이후에 시작하기
                       nextTick(() => {
